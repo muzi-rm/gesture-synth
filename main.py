@@ -4,7 +4,10 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
+import pygame
 import time
+
+pygame.mixer.init()
 
 model_path = '/Users/muzimpofu/Downloads/gesture-synth/hand_landmarker.task'
 gesture_model_path = '/Users/muzimpofu/Downloads/gesture-synth/gesture_recognizer.task'
@@ -23,13 +26,43 @@ GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 
 
+notes = {
+    "A": pygame.mixer.Sound("A5_Note.wav"),
+    "B": pygame.mixer.Sound("B5_Note.wav")
+
+
+}
+# def hand(result, handedness,hand_landmarks ):
+#     handedness_list = result.handedness
+
+#     if handedness is 'Right':
+#         index_tip = hand_landmarks[8]
+#         index_crease_two = hand_landmarks[6]
+#         if index_tip.y > index_crease_two.y:
+#             print("finger is bent")
+
+
+
+
+
 def draw_landmarks_on_image(frame_rgb, result):
     hand_landmarks_list = result.hand_landmarks
+    handedness_list = result.handedness
     annotated_image = np.copy(frame_rgb)
     
 
     for idx in range(len(hand_landmarks_list)):
         hand_landmarks = hand_landmarks_list[idx]
+        handedness = handedness_list[idx][0].category_name
+
+        print(f"Hand {idx}: {handedness}")
+
+        if handedness == 'Right':
+                index_tip = hand_landmarks[8]
+                index_crease_two = hand_landmarks[7]
+                if index_tip.y > index_crease_two.y:
+                    print("finger is bent")
+
         hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
 
         for landmark in hand_landmarks:
@@ -39,6 +72,7 @@ def draw_landmarks_on_image(frame_rgb, result):
                 z=landmark.z)
 
             hand_landmarks_proto.landmark.append(converted_landmark)
+    
                 
         
 
@@ -61,21 +95,22 @@ def print_result(result: HandLandmarkerResult, output_image: mp.Image, timestamp
     global latest_annotated_image
 
     # print('hand landmarker result: {}'.format(result))
+    # print(result.handedness)
 
     annotated_image = draw_landmarks_on_image(output_image.numpy_view(), result)
 
     latest_annotated_image = annotated_image
 
 
-def gesture_print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
-    if result.gestures:
-        print('gesture recognition result: {}'.format(result.gestures[0][0].category_name))
+# def gesture_print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+#     if result.gestures:
+#         print('gesture recognition result: {}'.format(result.gestures[0][0].category_name))
 
 
-gesture_options = GestureRecognizerOptions(
-    base_options=BaseOptions(model_asset_path=gesture_model_path),
-    running_mode=VisionRunningMode.LIVE_STREAM,
-    result_callback=gesture_print_result)
+# gesture_options = GestureRecognizerOptions(
+#     base_options=BaseOptions(model_asset_path=gesture_model_path),
+#     running_mode=VisionRunningMode.LIVE_STREAM,
+#     result_callback=gesture_print_result)
 
 
 options = HandLandmarkerOptions(
@@ -89,7 +124,7 @@ options = HandLandmarkerOptions(
 
 
 with HandLandmarker.create_from_options(options) as landmarker:
-    with GestureRecognizer.create_from_options(gesture_options) as recognizer:
+    # with GestureRecognizer.create_from_options(gesture_options) as recognizer:
         cap = cv.VideoCapture(0)
         if not cap.isOpened():
             print("Cannot open camera")
@@ -113,7 +148,7 @@ with HandLandmarker.create_from_options(options) as landmarker:
                             
                 landmarker.detect_async(mp_image, frame_timestamp_ms)
 
-                recognizer.recognize_async(mp_image, frame_timestamp_ms)
+                # recognizer.recognize_async(mp_image, frame_timestamp_ms)
 
                 if latest_annotated_image is not None:
                     new_image = cv.cvtColor(latest_annotated_image, cv.COLOR_RGB2BGR)
