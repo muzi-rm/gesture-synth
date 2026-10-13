@@ -27,11 +27,36 @@ GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 
 
 notes = {
-    "A": pygame.mixer.Sound("A5_Note.wav"),
-    "B": pygame.mixer.Sound("B5_Note.wav")
+    "A": pygame.mixer.Sound("Piano Notes/A5 Note.wav"),
+    # "B": pygame.mixer.Sound("Piano_Notes/B5_Note.wav"),
+    # "C": pygame.mixer.Sound("Piano_Notes/C5_Note.wav"),
+    # "D": pygame.mixer.Sound("Piano_Notes/D5_Note.wav"),
+    # "E": pygame.mixer.Sound("Piano_Notes/E5_Note.wav"),
+    # "F": pygame.mixer.Sound("Piano_Notes/F5_Note.wav"),
+    # "G": pygame.mixer.Sound("Piano_Notes/G5_Note.wav"),
 
 
 }
+
+note_playing = {
+     "A": False,
+     "B": False,
+     "C": False,
+     "D": False,
+     "E": False,
+     "F": False,
+     "G": False
+     
+}
+
+finger_bent = {
+     "thumb": False,
+     "index": False,
+     "middle": False,
+     "ring": False,
+     "pinky": False
+}
+
 # def hand(result, handedness,hand_landmarks ):
 #     handedness_list = result.handedness
 
@@ -55,13 +80,27 @@ def draw_landmarks_on_image(frame_rgb, result):
         hand_landmarks = hand_landmarks_list[idx]
         handedness = handedness_list[idx][0].category_name
 
-        print(f"Hand {idx}: {handedness}")
+        # print(f"Hand {idx}: {handedness}")
 
-        if handedness == 'Right':
-                index_tip = hand_landmarks[8]
-                index_crease_two = hand_landmarks[7]
-                if index_tip.y > index_crease_two.y:
-                    print("finger is bent")
+        # if handedness == 'Right':
+                # thumb_tip = hand_landmarks[4]
+                # index_tip = hand_landmarks[8]
+                # middle_tip = hand_landmarks[12]
+                # ring_tip = hand_landmarks[16]
+                # pinky_tip = hand_landmarks[20]
+                # thumb_knuckle = hand_landmarks[1]
+                # index_knuckle = hand_landmarks[5]
+                # middle_knuckle = hand_landmarks[9]
+                # ring_knuckle = hand_landmarks[13]
+                # pinky_knuckle = hand_landmarks[17]
+                # if index_tip.y > index_knuckle.y:
+                #      finger_bent["index"] = True
+                #      print(finger_bent["index"])
+                # else:
+                #      finger_bent["index"] = False
+                # if middle_tip.y > middle_knuckle.y:
+                #      finger_bent["middle"] = True
+                    
 
         hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
 
