@@ -66,8 +66,23 @@ finger_bent = {
 #         if index_tip.y > index_crease_two.y:
 #             print("finger is bent")
 
+release_tolerance = 0.05
+bend_tolerance = 0.05
 
+def is_finger_bent(tip, knuckle, was_bent ):
 
+    if was_bent:
+        return tip.y > knuckle.y - release_tolerance
+    else:
+        return tip.y > knuckle.y - bend_tolerance
+
+def is_thumb_bent(tip, knuckle, was_bent):
+
+    if was_bent:
+        return tip.x < knuckle.x + release_tolerance
+
+    else:
+        return tip.x < knuckle.x + bend_tolerance
 
 
 def draw_landmarks_on_image(frame_rgb, result):
@@ -79,27 +94,124 @@ def draw_landmarks_on_image(frame_rgb, result):
     for idx in range(len(hand_landmarks_list)):
         hand_landmarks = hand_landmarks_list[idx]
         handedness = handedness_list[idx][0].category_name
+        finger_position = None
+        
 
         # print(f"Hand {idx}: {handedness}")
 
-        # if handedness == 'Right':
-                # thumb_tip = hand_landmarks[4]
-                # index_tip = hand_landmarks[8]
-                # middle_tip = hand_landmarks[12]
-                # ring_tip = hand_landmarks[16]
-                # pinky_tip = hand_landmarks[20]
-                # thumb_knuckle = hand_landmarks[1]
-                # index_knuckle = hand_landmarks[5]
-                # middle_knuckle = hand_landmarks[9]
-                # ring_knuckle = hand_landmarks[13]
-                # pinky_knuckle = hand_landmarks[17]
-                # if index_tip.y > index_knuckle.y:
-                #      finger_bent["index"] = True
-                #      print(finger_bent["index"])
-                # else:
-                #      finger_bent["index"] = False
-                # if middle_tip.y > middle_knuckle.y:
-                #      finger_bent["middle"] = True
+        if handedness == 'Right':
+            thumb_tip = hand_landmarks[4]
+            index_tip = hand_landmarks[8]
+            middle_tip = hand_landmarks[12]
+            ring_tip = hand_landmarks[16]
+            pinky_tip = hand_landmarks[20]
+
+            thumb_knuckle = hand_landmarks[1]
+            index_knuckle = hand_landmarks[5]
+            middle_knuckle = hand_landmarks[9]
+            ring_knuckle = hand_landmarks[13]
+            pinky_knuckle = hand_landmarks[17]
+
+            # Index finger
+            finger_bent["index"] = is_finger_bent(
+                index_tip,
+                index_knuckle,
+                finger_bent["index"]
+            )
+
+            finger_bent["middle"] = is_finger_bent(
+                middle_tip,
+                middle_knuckle,
+                finger_bent["middle"]
+            )
+
+            finger_bent["ring"] = is_finger_bent(
+                ring_tip,
+                ring_knuckle,
+                finger_bent["ring"]
+            )
+
+            finger_bent["pinky"] = is_finger_bent(
+                pinky_tip,
+                pinky_knuckle,
+                finger_bent["pinky"]
+            )
+
+            finger_bent["thumb"] = is_thumb_bent(
+                thumb_tip,
+                middle_knuckle,
+                finger_bent["thumb"]
+            )
+
+            # print(finger_bent)
+
+
+
+            if (
+                finger_bent["thumb"]
+                and not finger_bent["index"]
+                and finger_bent["middle"]
+                and finger_bent["ring"]
+                and finger_bent["pinky"]
+            ):
+                finger_position = "one"
+
+            elif (
+                finger_bent["thumb"]
+                and not finger_bent["index"]
+                and not finger_bent["middle"]
+                and finger_bent["ring"]
+                and finger_bent["pinky"]
+            ):
+                finger_position = "two"
+
+            elif (
+                finger_bent["thumb"]
+                and not finger_bent["index"]
+                and not finger_bent["middle"]
+                and not finger_bent["ring"]
+                and finger_bent["pinky"]
+            ):
+                finger_position = "three"
+
+            elif (
+                finger_bent["thumb"]
+                and not finger_bent["index"]
+                and not finger_bent["middle"]
+                and not finger_bent["ring"]
+                and not finger_bent["pinky"]
+            ):
+                finger_position = "four"
+
+            elif (
+                not finger_bent["thumb"]
+                and not finger_bent["index"]
+                and not finger_bent["middle"]
+                and not finger_bent["ring"]
+                and not finger_bent["pinky"]
+            ):
+                finger_position = "five"
+
+            elif (
+                finger_bent["thumb"]
+                and not finger_bent["index"]
+                and finger_bent["middle"]
+                and finger_bent["ring"]
+                and not finger_bent["pinky"]
+            ):
+                finger_position = "six (rock n roll)"
+
+            elif (
+                not finger_bent["thumb"]
+                and not finger_bent["index"]
+                and finger_bent["middle"]
+                and finger_bent["ring"]
+                and not finger_bent["pinky"]
+            ):
+                finger_position = "seven (spider-Man)"
+
+            print(finger_position)
+
                     
 
         hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
